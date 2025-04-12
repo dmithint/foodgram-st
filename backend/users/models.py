@@ -1,63 +1,97 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import RegexValidator
 from django.db import models
+
+from foodgram_backend.constants import TEXT_LENGTH_MAX, TEXT_LENGTH_MEDIUM
+from users.manager import UserManager
 
 
 class User(AbstractUser):
+    """Кастомный пользователь системы."""
+
     first_name = models.CharField(
-        max_length=150,
-        verbose_name='Имя'
+        'Имя',
+        max_length=TEXT_LENGTH_MEDIUM,
+        validators=[
+            RegexValidator(
+                regex=r'^[А-Яа-яЁёA-Za-z]+$',
+                message='Поле должно содержать только буквы',
+                code='invalid_name',
+            ),
+        ],
     )
     last_name = models.CharField(
-        max_length=150,
-        verbose_name='Фамилия'
+        'Фамилия',
+        max_length=TEXT_LENGTH_MEDIUM,
+        validators=[
+            RegexValidator(
+                regex=r'^[А-Яа-яЁёA-Za-z]+$',
+                message='Поле должно содержать только буквы',
+                code='invalid_name',
+            ),
+        ],
     )
     username = models.CharField(
-        max_length=150,
-        verbose_name='Логин',
-        unique=True
-    )
-    password = models.CharField(
-        max_length=150,
-        verbose_name='Пароль'
+        'Никнейм',
+        max_length=TEXT_LENGTH_MEDIUM,
+        unique=True,
+        error_messages={
+            'unique': 'Никнейм занят.',
+        },
+        validators=[UnicodeUsernameValidator()]
     )
     email = models.EmailField(
-        verbose_name='Email',
-        unique=True,
-        max_length=254
+        'Электронная почта',
+        max_length=TEXT_LENGTH_MAX,
+        unique=True
     )
+    avatar = models.ImageField('Аватар', upload_to='users/')
 
-    REQUIRED_FIELDS = [
-        'username',
-        'password',
-        'first_name',
-        'last_name',
-    ]
-
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username', 'password']
     USERNAME_FIELD = 'email'
 
+    objects = UserManager()
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
     def __str__(self):
-        return f'{self.username}'
+        return self.username
 
 
 class Subscription(models.Model):
-    user = models.ForeignKey(
+    """Подписка на автора."""
+
+    subscriber = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Подписчик'
+        verbose_name='Подписчик',
+        related_name='subscribers',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Автор, на которого подписываются'
+        verbose_name='Автор',
+        related_name='authors',
     )
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        ordering = ('subscriber',)
         constraints = [
             models.UniqueConstraint(
-                fields=('user', 'author',),
-                name='unique_user_author'
-            )]
+                fields=['subscriber', 'author'],
+                name='unique_subscriber_author'
+            ),
+            models.CheckConstraint(
+                name='check_subscriber_author',
+                check=~models.Q(subscriber=models.F('author')),
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.subscriber} подписан на {self.author}'
