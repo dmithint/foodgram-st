@@ -6,7 +6,6 @@ from recipes.models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    Tag,
 )
 
 
@@ -40,7 +39,6 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = (
         'author__username',
-        'tags'
     )
     inlines = (RecipeIngredientInline,)
 
@@ -49,7 +47,7 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         queryset = queryset.select_related(
             'author'
-        ).prefetch_related('tags', 'recipe_ingredients__ingredient')
+        ).prefetch_related('recipe_ingredients__ingredient')
         return queryset
 
 
@@ -58,15 +56,6 @@ class IngredientAdmin(admin.ModelAdmin):
     """Административное представление ингредиентов рецепта."""
 
     list_display = ('id', 'name', 'measurement_unit')
-    list_display_links = ('name',)
-    search_fields = ('name',)
-
-
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    """Административное представление тегов рецепта."""
-
-    list_display = ('id', 'name', 'slug')
     list_display_links = ('name',)
     search_fields = ('name',)
 

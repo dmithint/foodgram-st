@@ -28,7 +28,6 @@ from api.serializers import (
     ShoppingCartSerializer,
     SubscriptionGetSerializer,
     SubscriptionPostSerializer,
-    TagSerializer,
     UserGetSerializer,
     UserPostSerializer,
 )
@@ -39,7 +38,6 @@ from recipes.models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    Tag,
 )
 from users.models import Subscription, User
 
@@ -145,14 +143,6 @@ class UserViewSet(DjoserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для работы с тегами."""
-
-    pagination_class = None
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-
-
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для работы с ингредиентами."""
 
@@ -172,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = (
         Recipe.objects
         .select_related('author')
-        .prefetch_related('tags', 'recipe_ingredients__ingredient')
+        .prefetch_related('recipe_ingredients__ingredient')
     )
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
@@ -265,7 +255,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = (
             Recipe.objects
             .select_related('author')
-            .prefetch_related('tags', 'recipe_ingredients')
+            .prefetch_related('recipe_ingredients')
         )
         if user.is_authenticated:
             queryset = queryset.annotate(

@@ -11,7 +11,6 @@ from recipes.models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    Tag,
 )
 from users.models import Subscription, User
 
@@ -91,14 +90,6 @@ class UserGetSerializer(serializers.ModelSerializer):
         )
 
 
-class TagSerializer(serializers.ModelSerializer):
-    """Сериализатор тега."""
-
-    class Meta:
-        model = Tag
-        fields = ('id', 'name', 'slug')
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор инргедиентов."""
 
@@ -150,9 +141,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
-    )
     ingredients = RecipeIngredientPostSerializer(
         many=True, source='recipe_ingredients'
     )
@@ -163,7 +151,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
         fields = (
             'author',
             'ingredients',
-            'tags',
             'image',
             'name',
             'text',
@@ -174,14 +161,9 @@ class RecipePostSerializer(serializers.ModelSerializer):
     def validate(self, value):
         """Валидация ингредиентов и тегов."""
         ingredients = value.get('recipe_ingredients')
-        tags = value.get('tags')
         if not ingredients:
             raise serializers.ValidationError(
                 'Отсутствует обязательное поле ингредиенты'
-            )
-        if not tags:
-            raise serializers.ValidationError(
-                'Отсутствует обязательное поле теги'
             )
         ingredients_id = [
             ingredient.get('ingredient').id for ingredient in ingredients
@@ -190,8 +172,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Ингредиенты должны быть уникальными.'
             )
-        if len(set(tags)) != len(tags):
-            raise serializers.ValidationError('Теги должны быть уникальными.')
         return value
 
     def add_ingredients(self, model, recipe, ingredients):
@@ -207,9 +187,8 @@ class RecipePostSerializer(serializers.ModelSerializer):
             )
         )
 
-    def _update_tags_and_ingredients(self, recipe, tags, ingredients):
+    def _update_ingredients(self, recipe, ingredients):
         """Обновляет теги и ингредиенты для рецепта."""
-        recipe.tags.set(tags)
         recipe.recipe_ingredients.all().delete()
         RecipeIngredient.objects.bulk_create(
             [
@@ -220,20 +199,18 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Создает новый рецепт с привязкой тегов и ингредиентов."""
-        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipe_ingredients')
         validated_data.pop('author', None)
         recipe = Recipe.objects.create(
             author=self.context['request'].user, **validated_data
         )
-        self._update_tags_and_ingredients(recipe, tags, ingredients)
+        self._update_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
         """Обновляет рецепт с возможностью изменить теги и ингредиенты."""
-        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipe_ingredients')
-        self._update_tags_and_ingredients(instance, tags, ingredients)
+        self._update_ingredients(instance, ingredients)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -247,7 +224,6 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     """Сериализатор получения информации рецепта."""
 
     author = UserGetSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
     ingredients = RecipeIngredientGetSerializer(
         source='recipe_ingredients',
         many=True,
@@ -265,7 +241,6 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id',
-            'tags',
             'author',
             'ingredients',
             'is_favorited',

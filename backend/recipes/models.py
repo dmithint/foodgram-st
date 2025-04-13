@@ -24,10 +24,6 @@ class Recipe(models.Model):
         through='RecipeIngredient',
         verbose_name='Ингредиенты'
     )
-    tags = models.ManyToManyField(
-        'Tag',
-        verbose_name='Тег'
-    )
     image = models.ImageField('Изображение', upload_to='recipes/images/')
     name = models.CharField('Название', max_length=TEXT_LENGTH_MAX)
     text = models.TextField('Описание')
@@ -120,25 +116,6 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'Ингридиент {self.ingredient} в количестве {self.amount}.'
-
-
-class Tag(models.Model):
-    """Теги рецептов."""
-
-    name = models.CharField(
-        'Название', max_length=TEXT_LENGTH_MIN, unique=True
-    )
-    slug = models.SlugField(
-        'Слаг', max_length=TEXT_LENGTH_MIN, unique=True
-    )
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
 
 
 class BaseFavoriteShoppingCart(models.Model):
