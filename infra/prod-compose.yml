@@ -34,6 +34,11 @@ services:
     image: dmithint/foodgram-frontend:latest
     volumes:
       - frontend_build:/app/result_build
+    healthcheck:
+      test: [ "CMD", "test", "-f", "/app/result_build/index.html" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
   nginx:
     container_name: foodgram-gateway
@@ -46,8 +51,13 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+#    depends_on:
+#      - frontend
+#      - backend
 
 volumes:
   postgres_data:
