@@ -19,20 +19,30 @@ services:
     image: dmithint/foodgram-backend:latest
     restart: always
     volumes:
-      - static_volume:/app/collected_static
-      - static_volume:/app/static  # Для статики Django
-      - media_volume:/app/media    # Для медиа файлов
+      - static_volume:/backend_static
+      - media_volume:/app/media
+#    volumes:
+#      - static_volume:/app/collected_static
+#      - static_volume:/app/static  # Для статики Django
+#      - media_volume:/app/media    # Для медиа файлов
     depends_on:
       db:
         condition: service_healthy
     env_file: .env
 
+
   frontend:
-    container_name: foodgram-frontend
-    image: dmithint/foodgram-frontend:latest
-    volumes:
-      - frontend_static:/frontend_static  # Статика React
+    image: dmithint/foodgram-frontend
     env_file: .env
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static_volume:/frontend_static
+#  frontend:
+#    container_name: foodgram-frontend
+#    image: dmithint/foodgram-frontend:latest
+#    volumes:
+#      - frontend_static:/frontend_static  # Статика React
+#    env_file: .env
 
   gateway:
     container_name: foodgram-gateway
@@ -44,9 +54,12 @@ services:
       - backend
       - frontend
     volumes:
-      - static_volume:/backend_static  # Статика Django
-      - media_volume:/backend_media    # Медиа Django
-      - frontend_static:/frontend_static  # Статика React
+      - static_volume:/staticfiles
+      - media_volume:/media
+#    volumes:
+#      - static_volume:/backend_static  # Статика Django
+#      - media_volume:/backend_media    # Медиа Django
+#      - frontend_static:/frontend_static  # Статика React
 
 volumes:
   postgres_data:
