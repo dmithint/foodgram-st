@@ -10,8 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5000:5432"
-    env_file:
-      - ./.env
+    env_file: .env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
       interval: 10s
@@ -28,8 +27,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - ./.env
+    env_file: .env
 
 
   frontend:
