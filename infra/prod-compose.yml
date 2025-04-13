@@ -50,14 +50,10 @@ services:
       - frontend_build:/usr/share/nginx/html
     ports:
       - "80:80"
-    depends_on:
-      frontend:
-        condition: service_healthy
-      backend:
-        condition: service_healthy
-#    depends_on:
-#      - frontend
-#      - backend
+      # depends_on:
+      # - frontend
+      #        condition: service_healthy
+      # - backend
 
 volumes:
   postgres_data:
