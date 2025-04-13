@@ -127,8 +127,8 @@ jobs:
           context: ./gateway/
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/foodgram_gateway:${{ github.sha }}
-            ${{ secrets.DOCKER_USERNAME }}/foodgram_gateway:latest
+            ${{ secrets.DOCKER_USERNAME }}/foodgram-gateway:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/foodgram-gateway:latest
 
 
   deploy:
