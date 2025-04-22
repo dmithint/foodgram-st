@@ -5,7 +5,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodgram_backend.settings')
 django.setup()
 
-from recipes.models import Ingredient  # адаптируй под свою модель и структуру
+from recipes.models import Ingredient
 
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as jsonfile:

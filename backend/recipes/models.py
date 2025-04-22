@@ -118,7 +118,7 @@ class RecipeIngredient(models.Model):
         return f'Ингридиент {self.ingredient} в количестве {self.amount}.'
 
 
-class BaseFavoriteShoppingCart(models.Model):
+class RecipesCollectionBase(models.Model):
     """Базовая модель для Избранного и Списка покупок."""
 
     user = models.ForeignKey(
@@ -133,7 +133,7 @@ class BaseFavoriteShoppingCart(models.Model):
         ordering = ('user',)
 
 
-class Favorite(BaseFavoriteShoppingCart):
+class Favorite(RecipesCollectionBase):
     """Рецепты в списке избранного."""
 
     class Meta:
@@ -151,7 +151,7 @@ class Favorite(BaseFavoriteShoppingCart):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
 
 
-class ShoppingCart(BaseFavoriteShoppingCart):
+class ShoppingCart(RecipesCollectionBase):
     """Список покупок для рецепта."""
 
     class Meta:
@@ -166,4 +166,4 @@ class ShoppingCart(BaseFavoriteShoppingCart):
         ]
 
     def __str__(self):
-        return f'Список покупок{self.user} для рецепта {self.recipe}'
+        return f'Список покупок {self.user} для рецепта {self.recipe}'

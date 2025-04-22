@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
@@ -12,12 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-# DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# TODO
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -67,13 +65,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 DATABASES = {
-    "default": {
-        "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.sqlite3"),
-        "NAME": os.getenv("DB_NAME", default=(BASE_DIR / "db.sqlite3")),
-        "USER": os.getenv("POSTGRES_USER", default=None),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", default=None),
-        "HOST": os.getenv("DB_HOST", default=None),
-        "PORT": os.getenv("DB_PORT", default=None),
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': os.getenv('DB_NAME', default=(BASE_DIR / 'db.sqlite3')),
+        'USER': os.getenv('POSTGRES_USER', default=None),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default=None),
+        'HOST': os.getenv('DB_HOST', default=None),
+        'PORT': os.getenv('DB_PORT', default=None),
     }
 }
 
@@ -139,8 +137,6 @@ DJOSER = {
 }
 
 
-import sys
-import logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -156,7 +152,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',  # можно менять на INFO, WARNING и т.д.
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
             'stream': sys.stdout,
@@ -171,14 +167,10 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',  # Уровень логирования можно менять
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.db.backends': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',  # Показывает SQL-запросы
-        },
-        'myapp': {  # замените на название своего приложения, если хотите логировать специфично
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },

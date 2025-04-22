@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('first_name', models.CharField(max_length=150, validators=[django.core.validators.RegexValidator(code='invalid_name', message='Поле должно содержать только буквы', regex='^[А-Яа-яЁёA-Za-z]+$')], verbose_name='Имя')),
                 ('last_name', models.CharField(max_length=150, validators=[django.core.validators.RegexValidator(code='invalid_name', message='Поле должно содержать только буквы', regex='^[А-Яа-яЁёA-Za-z]+$')], verbose_name='Фамилия')),
-                ('username', models.CharField(error_messages={'unique': 'Никнейм занят.'}, max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='Никнейм')),
+                ('username', models.CharField(error_messages={'unique': 'Логин занят.'}, max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='Логин')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='Электронная почта')),
                 ('avatar', models.ImageField(upload_to='users/', verbose_name='Аватар')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),

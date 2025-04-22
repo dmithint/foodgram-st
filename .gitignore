@@ -1,6 +1,6 @@
 frontend/node_modules
 infra/frontend/build
-infra/.env
+infra/prod/.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -106,10 +106,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-infra/.env
 .venv
 .venv/
-infra/.env/
 env/
 venv/
 ENV/
