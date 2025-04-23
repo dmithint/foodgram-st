@@ -1,4 +1,7 @@
-from django.db.models import Count, Exists, OuterRef
+from io import BytesIO
+
+from django.db.models import Count, Exists, OuterRef, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
@@ -33,7 +36,7 @@ from recipes.models import (
     Favorite,
     Ingredient,
     Recipe,
-    ShoppingCart,
+    ShoppingCart, RecipeIngredient,
 )
 from users.models import Subscription, User
 
@@ -265,6 +268,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 ),
             )
         return queryset
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+    )
+    def download_shopping_cart(self, request):
+        """Возвращает список покупок в виде текстового файла."""
+        ingredients = (
+            RecipeIngredient.objects.filter(
+                recipe__shopping_carts__user=request.user
+            )
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(sum=Sum('amount'))
+        )
+        buffer = self.generate_shopping_list(ingredients)
+        return HttpResponse(buffer, content_type='text/plain')
+
+    def generate_shopping_list(self, ingredients):
+        """Создает список покупок в виде буфера BytesIO."""
+        shopping_list = '\n'.join(
+            f'{ingredient["ingredient__name"]} - {ingredient["sum"]} '
+            f'({ingredient["ingredient__measurement_unit"]})'
+            for ingredient in ingredients
+        )
+        buffer = BytesIO()
+        buffer.write(shopping_list.encode('utf-8'))
+        buffer.seek(0)
+        return buffer
 
     @action(
         methods=['GET'],
